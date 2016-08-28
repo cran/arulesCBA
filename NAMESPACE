@@ -1,0 +1,13 @@
+useDynLib(arulesCBA)
+
+import("arules")
+import("Matrix")
+import("caret")
+import("testthat")
+
+importFrom("methods", "as", "is")
+
+S3method(predict, CBA)
+S3method(print, CBA)
+
+export("CBA", "rules")
