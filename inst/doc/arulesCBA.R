@@ -63,9 +63,10 @@ table(classes)
 
 
 ###################################################
-### code chunk number 11: arulesCBA.rnw:208-210
+### code chunk number 11: arulesCBA.rnw:208-211
 ###################################################
-library(caret)
-confusionMatrix(classes, iris.disc$Species)
+library(gmodels)
+CrossTable(classes, iris.disc$Species,           
+           prop.chisq = FALSE, prop.r = FALSE, prop.c = FALSE)
 
 
