@@ -28,7 +28,7 @@ head(iris.disc)
 ###################################################
 ### code chunk number 5: arulesCBA.rnw:162-163
 ###################################################
-classifier <- CBA(iris.disc, "Species", supp = 0.05, conf=0.9)
+classifier <- CBA(Species ~ ., iris.disc, supp = 0.05, conf=0.9)
 
 
 ###################################################
@@ -66,7 +66,7 @@ table(classes)
 ### code chunk number 11: arulesCBA.rnw:208-211
 ###################################################
 library(gmodels)
-CrossTable(classes, iris.disc$Species,           
+CrossTable(classes, iris.disc$Species,
            prop.chisq = FALSE, prop.r = FALSE, prop.c = FALSE)
 
 
