@@ -1,5 +1,5 @@
-7d19d0f370ce39a90b8700c881bfc7ce *DESCRIPTION
-f6e33a4315c3e2d2783ca8d37532853f *NAMESPACE
+1cbc55fb6c974120c907a189e84048f7 *DESCRIPTION
+48a66b2741c21ec2162738b06c1d46e8 *NAMESPACE
 22bb274c84720e54ccf6253554240970 *R/CBA.R
 39b4b4aad8c61ff7cb0b45458270861c *R/CBAInternal.R
 06cdbba29d3245caf6ca2a007038048a *R/CBA_ruleset.R
@@ -11,13 +11,14 @@ f6e33a4315c3e2d2783ca8d37532853f *NAMESPACE
 5591f726e9b663b05e8aadf0511e77ef *README.md
 3ecc52796be2867a5c85eaf30069c459 *build/vignette.rds
 d87a5c0a9a2ca21c451c71c2f7eace8a *inst/doc/arulesCBA.R
-5973026b5dba4f80202ed9aa42641fc8 *inst/doc/arulesCBA.pdf
+565e46b1c111536c77c1a7931ac692f9 *inst/doc/arulesCBA.pdf
 0c47b63a432fb7b4917beb8c2bbe9f50 *inst/doc/arulesCBA.rnw
 ff72fef96caba178db0e67355bca91f0 *man/CBA.Rd
 9ee5ee5c0d28affd2e70c2a2d4573ae8 *man/CBA_ruleset.Rd
+0c9aab9125c11334d9d1a925110e055e *man/bCBA.Rd
 6a83e31aab139450ad442607365fe11b *man/predict.Rd
 cffade5d7f3a5d6ab82887ebfb096182 *man/rules.Rd
-60896f1f36ab3c0102ae3e36bc11afc3 *src/cba.c
+99044237c0171068bf9da7a7dcff3273 *src/cba.c
 1e87289e9f7ed4784d68a41beb380485 *src/dll.c
 47c3d0fe99303bf1982f9eea34872c3e *src/weighted.c
 ed2f9d8a58dfce105138ddf66ce6b57a *tests/testthat.R
