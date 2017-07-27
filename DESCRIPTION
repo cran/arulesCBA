@@ -1,6 +1,6 @@
 Package: arulesCBA
-Version: 1.1.1
-Date: 2017-02-15
+Version: 1.1.2
+Date: 2017-07-26
 Title: Classification Based on Association Rules
 Author: Ian Johnson [aut, cre, cph], Michael Hahsler [ctb]
 Authors@R: c(person("Ian", "Johnson", role=c("aut", "cre","cph"),
@@ -14,6 +14,6 @@ Suggests: e1071, gmodels, discretization
 License: GPL-3
 BugReports: https://github.com/ianjjohnson/arulesCBA
 NeedsCompilation: yes
-Packaged: 2017-04-03 20:00:51 UTC; ij502y
+Packaged: 2017-07-27 00:33:38 UTC; ianjohnson
 Repository: CRAN
-Date/Publication: 2017-04-03 20:19:05 UTC
+Date/Publication: 2017-07-27 03:17:01 UTC
