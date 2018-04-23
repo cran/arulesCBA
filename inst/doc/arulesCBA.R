@@ -3,57 +3,61 @@
 ###################################################
 ### code chunk number 1: arulesCBA.rnw:129-130
 ###################################################
+options(digits=2)
+
+
+###################################################
+### code chunk number 2: arulesCBA.rnw:133-134
+###################################################
 library(arulesCBA)
 
 
 ###################################################
-### code chunk number 2: arulesCBA.rnw:139-140
+### code chunk number 3: arulesCBA.rnw:143-144
 ###################################################
 data(iris)
 
 
 ###################################################
-### code chunk number 3: arulesCBA.rnw:146-147
+### code chunk number 4: arulesCBA.rnw:150-151
 ###################################################
 classifier <- CBA(Species ~ ., iris, supp = 0.05, conf=0.9)
 
 
 ###################################################
-### code chunk number 4: arulesCBA.rnw:154-155
+### code chunk number 5: arulesCBA.rnw:158-159
 ###################################################
-print(classifier)
+classifier
 
 
 ###################################################
-### code chunk number 5: arulesCBA.rnw:163-164
+### code chunk number 6: arulesCBA.rnw:167-168
 ###################################################
 rules(classifier)
 
 
 ###################################################
-### code chunk number 6: arulesCBA.rnw:169-170
+### code chunk number 7: arulesCBA.rnw:173-174
 ###################################################
 inspect(rules(classifier))
 
 
 ###################################################
-### code chunk number 7: arulesCBA.rnw:176-177
+### code chunk number 8: arulesCBA.rnw:180-181
 ###################################################
-classes <- predict(classifier, iris)
+pred <- predict(classifier, iris)
 
 
 ###################################################
-### code chunk number 8: arulesCBA.rnw:182-184
+### code chunk number 9: arulesCBA.rnw:184-186
 ###################################################
-head(classes)
-table(classes)
+head(pred)
+table(pred)
 
 
 ###################################################
-### code chunk number 9: arulesCBA.rnw:192-195
+### code chunk number 10: arulesCBA.rnw:195-196
 ###################################################
-library(gmodels)
-CrossTable(classes, iris$Species,
-           prop.chisq = FALSE, prop.r = FALSE, prop.c = FALSE)
+table(pred, truth = iris$Species)
 
 
