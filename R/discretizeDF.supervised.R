@@ -1,40 +1,3 @@
-### MFH: This code is a fixed copy from arules. Remove after next release of arules (> 1.6-1)
-### prevent discretization if method is missing or NA
-
-discretizeDF <- function(df, methods = NULL, default = NULL) {
-
-  ### methods is a data.frame to get the discretization info from
-  if(is.data.frame(methods)) return(.rediscretizeDF(methods, df))
-
-  for(i in colnames(df)) {
-    if(!is.numeric(df[[i]])) next
-    args <- if(is.null(methods[[i]])) default else methods[[i]]
-
-    ### skip columns with method na
-    if(!is.null(args) && (is.null(args$method) || args$method == "none")) next
-
-    df[[i]] <- do.call("discretize", c(list(x = df[[i]]), args))
-  }
-
-  df
-}
-
-.rediscretizeDF <- function(data, newdata) {
-
-  if(!all(colnames(data) == colnames(newdata))) stop("columns in data and newdata do not conform!")
-
-  cps <- lapply(data, FUN = function(x) {
-    breaks <- attr(x, "discretized:breaks")
-    if(is.null(breaks)) NULL
-    else list(breaks = breaks, method = "fixed", labels = levels(x))
-  })
-
-  discretizeDF(newdata, methods = cps, default = list(method = "none"))
-}
-
-### end
-
-
 discretizeDF.supervised <- function(formula, data, method = "mdlp",
   dig.lab = 3, ...) {
 
@@ -42,7 +5,7 @@ discretizeDF.supervised <- function(formula, data, method = "mdlp",
 
   methods = c("mdlp", "caim", "cacc", "ameva", "chi2", "chimerge", "extendedchi2", "modchi2")
   method <- methods[pmatch(tolower(method), methods)]
-  if(is.na(method)) stop("Unknown method!")
+  if(is.na(method)) stop(paste("Unknown method! Available methods are", paste(methods, collapse = ", ")))
 
   vars <- .parseformula(formula, data)
   cl_id <- vars$class_ids
@@ -54,8 +17,15 @@ discretizeDF.supervised <- function(formula, data, method = "mdlp",
   if(method == "mdlp") {
     cps <- structure(vector("list", ncol(data)), names = colnames(data))
     for(i in var_ids) {
+
+      # cutPoints does not handle missing values!
+      missing <- is.na(data[[i]])
+      cPts <- try(cutPoints(data[[i]][!missing], data[[cl_id]][!missing]), silent = TRUE)
+      if(is(cPts, "try-error")) stop("Problem with discretizing column ", i,
+        " (maybe not enough non-missing values?)")
+
       cps[[i]] <- list(
-        breaks = c(-Inf, cutPoints(data[[i]], data[[cl_id]]), Inf),
+        breaks = c(-Inf, cPts, Inf),
         method = "fixed")
     }
 
@@ -85,8 +55,10 @@ discretizeDF.supervised <- function(formula, data, method = "mdlp",
 
   }
 
-  ### TODO: Fix method attribute
-  ### TODO: discretizeDF uses default for NULL! How can we prevent discretization?
-  discretizeDF(data, methods = cps, default = list(method = "none"))
+  data <- discretizeDF(data, methods = cps, default = list(method = "none"))
 
+  ### fix method attribute
+  for(i in var_ids) attr(data[[i]], "discretized:method") <- method
+
+  data
 }
