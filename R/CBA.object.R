@@ -1,7 +1,5 @@
 # create a CBA object from a set of rules
 
-### FIXME: we can specify weights/majority etc.
-
 # Constructor
 CBA_ruleset <- function(formula, rules, method = "first",
   weights = NULL, default = NULL, description = "Custom rule set"){
@@ -48,17 +46,14 @@ CBA_ruleset <- function(formula, rules, method = "first",
     default <- names(which.max(sapply(split(quality(rules)$support,
       unlist(as(rhs(rules), "list"))), sum)))
 
-  classifier <- list(
+  structure(list(
     rules = rules,
     default = default,
     class = class,
     method = method,
     weights = weights,
-    description = description)
-
-  class(classifier) <- "CBA"
-
-  return(classifier)
+    description = description),
+    class = "CBA")
 }
 
 
@@ -75,24 +70,27 @@ print.CBA <- function(x, ...)
   ))
 
 rules <- function(x) UseMethod("rules")
-rules.CBA <- function(x){
-  return(x$rules)
-}
+rules.CBA <- function(x) x$rules
 
-predict.CBA <- function(object, newdata, ...){
+predict.CBA <- function(object, newdata, type = c("class", "score"), ...){
+
+  type <- match.arg(type)
 
   method <- object$method
   if(is.null(method)) method <- "majority"
 
-  # weightedmean is just an alias for majority with weights.
-  methods <- c("first", "majority", "weighted") # , "weightedmean")
+  methods <- c("first", "majority", "weighted", "logit")
   m <- pmatch(method, methods)
   if(is.na(m)) stop("Unknown method")
   method <- methods[m]
 
-  if(!is.null(object$discretization))
+  if(!is.null(object$discretization)) {
     newdata <- discretizeDF(newdata, lapply(object$discretization,
       FUN = function(x) list(method="fixed", breaks=x)))
+  } else {
+    if(!is(newdata, "transactions"))
+    stop("Classifier does not contain discretization information. New data needs to be in the form of transactions. Check ? discretizeDF.")
+  }
 
   # If new data is not already transactions:
   # Convert new data into transactions and use recode to make sure
@@ -107,9 +105,9 @@ predict.CBA <- function(object, newdata, ...){
   dimnames(rulesMatchLHS) <- list(NULL, NULL)
 
   class_levels <- sapply(strsplit(object$class, '='), '[',2)
-  classifier.results <- unlist(as(rhs(object$rules), "list"))
-  classifier.results <- sapply(strsplit(classifier.results, '='), '[', 2)
-  classifier.results <- factor(classifier.results, levels = class_levels)
+  RHSclass <- unlist(as(rhs(object$rules), "list"))
+  RHSclass <- sapply(strsplit(RHSclass, '='), '[', 2)
+  RHSclass <- factor(RHSclass, levels = class_levels)
 
   # Default class
   default <- strsplit(object$default, '=')[[1]][2]
@@ -119,10 +117,10 @@ predict.CBA <- function(object, newdata, ...){
   # the majority, weighted majority or the highest-precidence
   # rule in the classifier
 
-
-  if(method == "majority" | method == "weighted") { # | method == "weightedmean") {
+  if(method == "majority" | method == "weighted" | method == "logit") {
 
     weights <- object$weights
+    biases <- object$biases
 
     # use a quality measure
     if(is.character(weights))
@@ -134,37 +132,49 @@ predict.CBA <- function(object, newdata, ...){
     # unweighted (use weights of 1)
     if(is.null(weights)) weights <- rep(1, length(object$rules))
 
-    # check
-    if(length(weights) != length(object$rules))
-      stop("length of weights does not match number of rules")
+    # transform weight vector into a matrix
+    if(!is.matrix(weights)) {
+      weights <- sapply(1:length(levels(RHSclass)), function(i) {
+        w <- weights
+        w[as.integer(RHSclass) != i] <- 0
+        w
+      })
+    }
 
-    scores <- sapply(1:length(levels(classifier.results)), function(i) {
-      classRuleWeights <- weights
-      classRuleWeights[as.integer(classifier.results) != i] <- 0
-      classRuleWeights %*% rulesMatchLHS
-    })
+    # check
+    if(nrow(weights) != length(object$rules))
+      stop("number of weights does not match number of rules")
+
+    # calculate score
+    scores <- t(crossprod(weights, rulesMatchLHS))
+
+    # add bias terms to the scores
+    if(is.null(biases)) biases <- rep(0, length(class_levels))
+
+    scores <- sweep(scores, 2, biases, '+')
+    colnames(scores) <- levels(RHSclass)
+
+    if(method == "logit") scores <- exp(scores)/(1+rowSums(exp(scores)))
+
+    if(type =="score") return(scores)
 
     # make sure default wins for ties
     scores[,defaultLevel] <- scores[,defaultLevel] + .Machine$double.eps
-
     output <- factor(apply(scores, MARGIN = 1, which.max),
-      levels = 1:length(levels(classifier.results)),
-      labels = levels(classifier.results))
-
+      levels = 1:length(levels(RHSclass)),
+      labels = levels(RHSclass))
     return(output)
 
-
   }else { ### method = first
+
+    if(type =="score") stop("prediction type 'score' is not supported for CBA classifiers using method 'first' (matching rule).")
+
     w <- apply(rulesMatchLHS, MARGIN = 2, FUN = function(x) which(x)[1])
-    output <- classifier.results[w]
+    output <- RHSclass[w]
     output[is.na(w)] <- default
   }
 
-
   # preserve the levels of original data for data.frames
-  output <- factor(output, levels = class_levels)
-
-  return(output)
-
+  factor(output, levels = class_levels)
 }
 

@@ -1,3 +1,10 @@
+# arulesCBA 1.1.5 (2019-11-05)
+* added RCAR (by Tyler Giallanza).
+* The interface for CBA() was updated.
+* CBA now complains if no rules are found.
+* CBA has now also M1 pruning.
+* mineCARs now uses ... to construct the parameters for apriori().
+
 # arulesCBA 1.1.4 (2018-12-04)
 * discretizeDF.supervised method mdlp now produces a better error message if it fails.
 * cleaned up the predict code to improve speed.
