@@ -1,4 +1,4 @@
-d99a70f0e1f6f9ecfec6d92871c70fbf *DESCRIPTION
+6fa66a0b81ae411ff802fc51280d10fd *DESCRIPTION
 2c45df587505555ee6bc553bab442d5c *NAMESPACE
 3cd0b66d62f44ecae633671629a78435 *NEWS.md
 0b29981771924b7cd3a1f671e910f343 *R/CBA.R
@@ -14,7 +14,7 @@ dd6483a8e5f32433b35cb042688644ab *R/wCBA.R
 c7e680268ef0bdf2b3d79c66e5356c75 *README.md
 c31a603555f1594c34cfa428c7eb64dc *build/vignette.rds
 7176bf57251a8be3f7f46760517b5d67 *inst/doc/arulesCBA.R
-4f8e6203c329d22700d5b76a45d4cad6 *inst/doc/arulesCBA.pdf
+4256883308973209b5ffb9e4bb4bd43d *inst/doc/arulesCBA.pdf
 46cb8604739c45052f3e8c98ca6332d1 *inst/doc/arulesCBA.rnw
 cc93430e351b99e390f7ba2d0c6172ef *man/CBA.Rd
 d9b0b40be595edde8569dea8baac652e *man/CBA.object.Rd
@@ -30,6 +30,6 @@ c009fe3742984083296454e8c06552d8 *man/wCBA.Rd
 ed2f9d8a58dfce105138ddf66ce6b57a *tests/testthat.R
 0866a00dccdf652867779b67bae3e2f5 *tests/testthat/test-CBA.R
 bb4c82bf5fd32cda2397b4231b2cbb6d *tests/testthat/test-CBA_ruleset.R
-96be9b4e14ab3d5b157064a76f50dfe3 *tests/testthat/test-RCAR.R
+645a6e6d678af06992c04604c3abdeaf *tests/testthat/test-RCAR.R
 355851ce06da09f14191c55ce5435038 *tests/testthat/test-discretize.R
 46cb8604739c45052f3e8c98ca6332d1 *vignettes/arulesCBA.rnw
