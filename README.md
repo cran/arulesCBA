@@ -1,16 +1,28 @@
 # Classification Based on Association Rules
 
-[![Travis-CI Build Status](https://api.travis-ci.org/ianjjohnson/arulesCBA.svg?branch=master)](https://travis-ci.org/ianjjohnson/arulesCBA)
+[![CRAN version](https://www.r-pkg.org/badges/version/arulesCBA)](https://cran.r-project.org/package=arulesCBA)
+[![Rdoc](http://www.rdocumentation.org/badges/version/arulesCBA)](http://www.rdocumentation.org/packages/arulesCBA)
 [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/arulesCBA)](https://cran.r-project.org/package=arulesCBA)
-[![CRAN version](http://www.r-pkg.org/badges/version/arulesCBA)](https://cran.r-project.org/package=arulesCBA)
+[![Travis-CI Build Status](https://api.travis-ci.org/ianjjohnson/arulesCBA.svg?branch=master)](https://travis-ci.org/ianjjohnson/arulesCBA)
+[![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/arulesCBA)](https://cran.r-project.org/package=arulesCBA)
 
-This R package 
+The R package [arulesCBA](https://cran.r-project.org/package=arulesCBA) (Hahsler et al, 2020) 
 is an extension of the package [arules](https://cran.r-project.org/package=arules) to perform
-association rule-based classification. It includes currently two classification algorithms. The first is the CBA algorithm described in Liu, et al. 1998.
-The second is a new weighted majority-vote based algorithm called bCBA which is currently being designed and tested. Time-critical sections of the code are implemented in C.
+association rule-based classification. The package implements the following algorithms:
 
-The package also provides support for supervised discretization and mining Class Association Rules (CARs).
+* CBA (Liu et al, 1998)
+* bCBA, wCBA (Ian Johnson, unpublished)
+* CMAR via LUCS-KDD Software Library (Li, Han and Pei, 2001)
+* CPAR via LUCS-KDD Software Library (Yin and Han, 2003)
+* C4.5 via J48 in R/Weka (Quinlan, 1993)
+* FOIL (Yin and Han, 2003)
+* PART via R/Weka (Frank and Witten, 1998)
+* PRM via LUCS-KDD Software Library (Yin and Han, 2003)
+* RCAR (Azmi et al, 2019)
+* RIPPER via R/Weka (Cohen, 1995)
 
+The package also provides the infrastructure for associative classification (supervised discetization, mining class association rules (CARs)), and implements various association rule-based classification strategies
+(first match, majority voting, weighted voting, etc.).
 
 ## Installation
 
@@ -30,16 +42,29 @@ install_github("ianjjohnson/arulesCBA")
 library("arulesCBA")
 data("iris")
  
-# learn a classifier using automatic default discretization
-classifier <- CBA(Species ~ ., data = iris, supp = 0.05, conf = 0.9)
+# learn a classifier
+classifier <- CBA(Species ~ ., data = iris)
 classifier
 
-  CBA Classifier Object
-  Class: Species=setosa, Species=versicolor, Species=virginica
-  Default Class: Species=setosa
-  Number of rules: 8
-  Classification method: first 
-  Description: CBA algorithm by Liu, et al. 1998 with support=0.05 and confidence=0.9
+    CBA Classifier Object
+    Class: Species=setosa, Species=versicolor, Species=virginica
+    Default Class: Species=versicolor
+    Number of rules: 6
+    Classification method: first  
+    Description: CBA algorithm (Liu et al., 1998)
+
+# inspect the rulebase
+inspect(rules(classifier), linebreak = TRUE)
+     lhs                           rhs                  support conf lift count 
+ [1] {Petal.Length=[-Inf,2.45)} => {Species=setosa}        0.33 1.00  3.0    50 
+ [2] {Sepal.Length=[6.15, Inf],       
+      Petal.Width=[1.75, Inf]}  => {Species=virginica}     0.25 1.00  3.0    37 
+ [3] {Sepal.Length=[5.55,6.15),   
+      Petal.Length=[2.45,4.75)} => {Species=versicolor}    0.14 1.00  3.0    21 
+ [4] {Sepal.Width=[-Inf,2.95),
+      Petal.Width=[1.75, Inf]}  => {Species=virginica}     0.11 1.00  3.0    17
+ [5] {Petal.Width=[1.75, Inf]}  => {Species=virginica}     0.30 0.98  2.9    45 
+ [6] {}                         => {Species=versicolor}    0.33 0.33  1.0   150
 
 # make predictions for the first few instances of iris
 predict(classifier, head(iris))
@@ -50,4 +75,11 @@ predict(classifier, head(iris))
 
 ## References
 
-* Liu, B. Hsu, W. and Ma, Y (1998). Integrating Classification and Association Rule Mining. _KDD'98 Proceedings of the Fourth International Conference on Knowledge Discovery and Data Mining,_ New York, 27-31 August. AAAI. pp. 80-86.
+* M. Hahsler, I. Johnson, T. Kliegr and J. Kuchar (2019). [Associative Classification in R: arc, arulesCBA, and rCBA](https://journal.r-project.org/archive/2019/RJ-2019-048/). _The R Journal_ 11(2), pp. 254-267.
+* M. Azmi, G.C. Runger, and A. Berrado (2019). Interpretable regularized class association rules algorithm for classification in a categorical data space. _Information Sciences,_ Volume 483, May 2019, pp. 313-331.
+* W. W. Cohen (1995). Fast effective rule induction. In A. Prieditis and S. Russell (eds.), _Proceedings of the 12th International Conference on Machine Learning,_ pp. 115-123. Morgan Kaufmann. ISBN 1-55860-377-8.
+* E. Frank and I. H. Witten (1998). Generating accurate rule sets without global optimization. In J. Shavlik (ed.), _Machine Learning: Proceedings of the Fifteenth International Conference,_ Morgan Kaufmann Publishers: San Francisco, CA.
+* W. Li, J. Han and J. Pei (2001). CMAR: accurate and efficient classification based on multiple class-association rules, _Proceedings 2001 IEEE International Conference on Data Mining,_ San Jose, CA, USA, pp. 369-376.
+* B. Liu, W. Hsu and Y. Ma (1998). Integrating Classification and Association Rule Mining. _KDD'98 Proceedings of the Fourth International Conference on Knowledge Discovery and Data Mining,_ New York, AAAI, pp. 80-86.
+* R. Quinlan (1993). _C4.5: Programs for Machine Learning._ Morgan Kaufmann Publishers, San Mateo, CA.
+* X. Yin and J. Han (2003). CPAR: Classification based on Predictive Association Rules, _Proceedings of the 2003 SIAM International Conference on Data Minin,_ pp. 331-235.

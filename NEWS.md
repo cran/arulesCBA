@@ -1,3 +1,18 @@
+# arulesCBA 1.2.0 (2020-04-17)
+* Version 1.2.0 has a major interface cleanup. This might require some change in existing code.
+* The classifiers now use as the default a min. confidence of .5 and maxlen of 5 (max. rule length). 
+* CBA now includes a default rule in the rule base.
+* added prepareTransactions to dicretize and convert a data.frame into transactions. 
+* added new function response to convert class items to class labels (factors).
+* added new function majorityClass.
+* added FOIL.
+* added RIPPER C4.5, and PART (via RWeka).
+* added PRM, CPAR and CMAR (via LUCS-KDD Software Library).
+* added datasets Mushroom and Lymphography.
+
+# arulesCBA 1.1.6 (2020-01-05)
+* maintenance release.
+
 # arulesCBA 1.1.5 (2019-11-05)
 * added RCAR (by Tyler Giallanza).
 * The interface for CBA() was updated.

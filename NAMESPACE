@@ -1,26 +1,47 @@
 useDynLib(arulesCBA)
 
-import("discretization")
 import("arules")
 import("Matrix")
-import("testthat")
-import("glmnet")
 
 importFrom("methods", "as", "is", "new", "slot<-", "slotNames")
 importFrom("stats", "as.formula", "df")
 
+# we use qualified names for these:
+#importFrom("glmnet", ...)
+#importFrom("discretization", ...)
+
+# this is now suggested
+#importFrom("rJava", ...)
+#importFrom("RWeka", ...)
+
 export("CBA",
-       "pruneCBA_M1",
-       "pruneCBA_M2",
-       "RCAR",
-       "rules",
-       "CBA_ruleset",
-       "bCBA",
-       "wCBA",
-       "discretizeDF.supervised",
-       "mineCARs",
-       "classFrequency"
-       )
+        "pruneCBA_M1",
+        "pruneCBA_M2",
+        "RCAR",
+        "FOIL",
+        "bCBA",
+        "wCBA",
+
+        "RIPPER_CBA",
+        "PART_CBA",
+        "C4.5_CBA",
+
+        "install_LUCS_KDD_CMAR",
+        "install_LUCS_KDD_CPAR",
+        "FOIL2",
+        "CPAR",
+        "PRM",
+        "CMAR",
+
+        "rules",
+        "CBA_ruleset",
+        "discretizeDF.supervised",
+        "prepareTransactions",
+        "mineCARs",
+        "classFrequency",
+        "majorityClass",
+        "response"
+)
 
 S3method(predict, CBA)
 S3method(print, CBA)

@@ -1,46 +1,31 @@
-CBA <- function(formula, data, support = 0.1, confidence = 0.8, pruning = "M1", disc.method = "mdlp",
-  balanceSupport = FALSE, parameter = NULL, control = NULL, ...){
+CBA <- function(formula, data, pruning = "M1",
+  parameter = NULL, control = NULL, balanceSupport = FALSE,
+  disc.method = "mdlp", verbose = FALSE, ...){
 
-  # prepare data
-  disc_info <- NULL
-  if(is(data, "data.frame")){
-    data <- discretizeDF.supervised(formula, data, method = disc.method)
-    disc_info <- lapply(data, attr, "discretized:breaks")
-  }
-
-  # convert to transactions for rule mining
-  trans <- as(data, "transactions")
-
-  # parse formula
   formula <- as.formula(formula)
-  vars <- .parseformula(formula, trans)
-  class <- vars$class_names
-  vars <- vars$var_names
-
-  if(is.null(control)) control <- as(list(verbose = FALSE), "APcontrol")
-  else  control <- as(control, "APcontrol")
+  trans <- prepareTransactions(formula, data, disc.method)
 
   # mine and prune CARs
-  rulebase <- mineCARs(formula, trans, balanceSupport = balanceSupport,
-    parameter = parameter, control = control,
-    support = support, confidence = confidence, ...)
+  if(verbose) cat("\nMining CARs...\n")
+  rulebase <- mineCARs(formula, trans,
+    parameter = parameter, control = control, balanceSupport = balanceSupport,
+    verbose = verbose, ...)
 
-  if(control@verbose) cat("\nPruning rules...\n")
+  if(verbose) cat("\nPruning CARs...\n")
   if(pruning == "M1") rulebase <- pruneCBA_M1(formula, rulebase, trans)
   else rulebase <- pruneCBA_M2(formula, rulebase, trans)
 
-  if(control@verbose) cat("Done...\n")
+  if(verbose) cat("CARs left:", length(rulebase), "\n")
 
   # assemble classifier
   structure(list(
-    rules = rulebase,
-    class = class,
-    default = info(rulebase)$defaultClass,
-    discretization = disc_info,
     formula = formula,
+    discretization = attr(trans, "disc_info"),
+    parameter = c(list(...), list(parameter)),
+    rules = rulebase,
+    default = NA,
     method = "first",
-    description = paste0("CBA algorithm by Liu, et al. 1998 with support=", support,
-      " and confidence=", confidence)
+    description = paste0("CBA algorithm (Liu et al., 1998)")
   ),
     class = "CBA"
   )
@@ -49,13 +34,13 @@ CBA <- function(formula, data, support = 0.1, confidence = 0.8, pruning = "M1", 
 
 
 ### M1 pruning algorithm for CBA
-pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
+pruneCBA_M1 <- function(formula, rules, transactions, verbose = FALSE){
 
   if(verbose)
-    cat(paste("CBA M1 pruning for", length(rules), "rules and", nrow(trans), "transactions.\n"))
+    cat(paste("CBA M1 pruning for", length(rules), "rules and", nrow(transactions), "transactions.\n"))
 
   formula <- as.formula(formula)
-  parsedFormula <- .parseformula(formula, trans)
+  parsedFormula <- .parseformula(formula, transactions)
   class <- parsedFormula$class_names
   class_ids <- parsedFormula$class_ids
   vars <- parsedFormula$var_names
@@ -77,8 +62,8 @@ pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
     defaultClass = numeric(length(rules))
   )
 
-  classes <- t(as(trans[, class_ids], "ngCMatrix"))
-  uncoveredTrans <- as(trans@data, "dgCMatrix")
+  classes <- t(as(transactions[, class_ids], "ngCMatrix"))
+  uncoveredTrans <- as(transactions@data, "dgCMatrix")
 
   lhss <- as(lhs(rules)@data, "dgCMatrix")
   rhss <- as(rhs(rules)@data, "dgCMatrix")
@@ -88,18 +73,19 @@ pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
     lhs <- lhss[, i, drop = FALSE]
     rhs <- rhss[, i, drop = FALSE]
 
-    covered <- crossprod(uncoveredTrans, lhs) == sum(lhs) ### this is is.subset
-    numCovered <- sum(covered)
-    if(numCovered > 0) coveredTrans <-  uncoveredTrans[, covered[,1], drop = FALSE]
-    uncoveredTrans <- uncoveredTrans[, !covered[,1], drop = FALSE]
-
     rulesPerClassLeft <- rulesPerClassLeft - rhs[class_ids]
 
-    if(numCovered < 1) next
+    covered <- crossprod(uncoveredTrans, lhs) == sum(lhs) ### this is is.subset
+    numCovered <- sum(covered)
 
     if(verbose)
       cat(paste("Rule", i, "covers", numCovered, "transactions.\n"))
 
+    # no rules are covered
+    if(numCovered < 1) next
+
+    coveredTrans <-  uncoveredTrans[, covered[,1], drop = FALSE]
+    uncoveredTrans <- uncoveredTrans[, !covered[,1], drop = FALSE]
 
     numTrue <- sum(crossprod(coveredTrans, rhs) > 0)
     numFalse <- numCovered - numTrue
@@ -124,6 +110,8 @@ pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
   }
 
   # Step 3: select rule set that minimizes the total error
+  # (total error is the error made if we delete all rules after and use a default
+  # rule with the majority as the RHS)
   strongRules <- which(ruleStats$coveredTrans>0)
   ruleStats <- ruleStats[strongRules,, drop = FALSE]
   ruleStats$errorTotal <- cumsum(ruleStats$errorRule) + ruleStats$errorDefault
@@ -131,13 +119,26 @@ pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
   cutoff <- which.min(ruleStats$errorTotal)
 
   rulebase <- rules[strongRules[1:cutoff]]
-  defaultClass <- colnames(classes)[ruleStats$defaultClass[cutoff]]
   quality(rulebase)$coveredTransactions <- ruleStats$coveredTrans[1:cutoff]
-  quality(rulebase)$ruleErrors <- ruleStats$errorRule[1:cutoff]
+  quality(rulebase)$totalErrors <- ruleStats$errorTotal[1:cutoff]
+
+  ### add default rule
+  defaultClass <- colnames(classes)[ruleStats$defaultClass[cutoff]]
+  default_rule <- new("rules",
+    lhs = encode(character(), itemLabels(rulebase)),
+    rhs = encode(defaultClass, itemLabels(rulebase))
+  )
+
+  s <- itemFrequency(transactions[, defaultClass])
+  quality(default_rule) <- data.frame(support = s, confidence = s, lift = 1,
+    count = length(transactions), size = 1,
+    coveredTransactions = length(transactions) - sum(quality(rulebase)$coveredTransactions),
+    totalErrors = min(ruleStats$errorTotal))
+  rulebase <- c(rulebase, default_rule)
 
   info(rulebase)$defaultClass <- defaultClass
-  info(rulebase)$pruning <- "arulesCBA_M1"
 
+  info(rulebase)$pruning <- "CBA_M1"
   return(rulebase)
 }
 
@@ -215,10 +216,12 @@ pruneCBA_M1 <- function(formula, rules, trans, verbose = FALSE){
 # }
 
 ### M2 pruning algorithm for CBA
-pruneCBA_M2 <- function(formula, rules, trans){
+# FIXME: verbose needs to be implemented
+pruneCBA_M2 <- function(formula, rules, transactions, verbose = FALSE){
 
+  if(verbose) warning("verbose not implemented yet for pruneCBA_M2.")
   formula <- as.formula(formula)
-  vars <- .parseformula(formula, trans)
+  vars <- .parseformula(formula, transactions)
   class <- vars$class_names
   vars <- vars$var_names
 
@@ -228,8 +231,8 @@ pruneCBA_M2 <- function(formula, rules, trans){
   rules <- sort(rules, by=c("confidence", "support", "size"), decreasing = c(TRUE, TRUE, FALSE))
 
   # Step 2: Calculate covered cases
-  rulesMatchLHS <- is.subset(lhs(rules), trans, sparse = TRUE)
-  rulesMatchRHS <- is.subset(rhs(rules), trans, sparse = TRUE)
+  rulesMatchLHS <- is.subset(lhs(rules), transactions, sparse = TRUE)
+  rulesMatchRHS <- is.subset(rhs(rules), transactions, sparse = TRUE)
   matches <- rulesMatchLHS & rulesMatchRHS
   #falseMatches <- rulesMatchLHS & as(!rulesMatchRHS, "lgCMatrix") ### ! makes the matrix dense
   falseMatches <- rulesMatchLHS & !rulesMatchRHS
@@ -238,7 +241,7 @@ pruneCBA_M2 <- function(formula, rules, trans){
   casesCovered <- vector('integer', length=length(rules))
   strongRules <- vector('logical', length=length(rules))
 
-  a <- .Call("R_stage1", length(trans), strongRules, casesCovered,
+  a <- .Call("R_stage1", length(transactions), strongRules, casesCovered,
     matches@i, matches@p, length(matches@i),
     falseMatches@i, falseMatches@p, length(falseMatches@i),
     length(rules), PACKAGE = "arulesCBA")
@@ -249,32 +252,43 @@ pruneCBA_M2 <- function(formula, rules, trans){
 
   #initializing variables for stage 3
   ruleErrors <- 0
-  rightHand <- unlist(as(trans[, class], "list"))
+  rightHand <- unlist(as(transactions[, class], "list"))
   classDistr <- as.integer(factor(rightHand))
 
-  covered <- vector('logical', length=length(trans)) ### is all FALSE
+  covered <- vector('logical', length=length(transactions)) ### is all FALSE
 
   # default class is the majority class in the remaining data)
   defaultClasses <- vector('integer', length=length(rules))
-
   totalErrors <- vector('integer', length=length(rules))
 
+  ### FIXME: there is a bug in stage 3! The totalErrors count is off!
   .Call("R_stage3", strongRules, casesCovered, covered, defaultClasses, totalErrors, classDistr,
     replace,matches@i, matches@p, length(matches@i),
     falseMatches@i, falseMatches@p, length(falseMatches@i), length(class),  PACKAGE = "arulesCBA")
 
-  quality(rules)$casesCovered <- casesCovered
+  quality(rules)$coveredTransactions <- casesCovered
   quality(rules)$totalErrors <- totalErrors
 
   # Step 3: The first rule at which there is the least number of errors recorded is the cutoff rule.
   rulebase <- rules[strongRules][1:which.min(totalErrors[strongRules])]
 
-  #add a default class to the classifier (the default class from the last rule included in the classifier)
+  ### add default rule
   defaultClass <- class[defaultClasses[strongRules][[which.min(totalErrors[strongRules])]]]
-  ### add rule for default class!
-  info(rulebase)$defaultClass <- defaultClass
-  info(rulebase)$pruning <- "arulesCBA_M2"
 
+  default_rule <- new("rules",
+    lhs = encode(character(), itemLabels(rulebase)),
+    rhs = encode(defaultClass, itemLabels(rulebase))
+  )
+  s <- itemFrequency(transactions[, defaultClass])
+  quality(default_rule) <- data.frame(support = s, confidence = s, lift = 1,
+    count = length(transactions), size = 1,
+    coveredTransactions = length(transactions) - sum(quality(rulebase)$coveredTransactions),
+    totalErrors = min(totalErrors[strongRules]))
+  rulebase <- c(rulebase, default_rule)
+
+  info(rulebase)$defaultClass <- defaultClass
+
+  info(rulebase)$pruning <- "CBA_M2"
   return(rulebase)
 }
 

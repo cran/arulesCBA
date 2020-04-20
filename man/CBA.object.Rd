@@ -42,17 +42,16 @@ CBA_ruleset(formula, rules, method = "first", weights = NULL, default = NULL,
   \code{CBA_ruleset()} returns an object of class
   \code{CBA} representing the trained classifier
   with fields:
+  \item{formula}{used formula.}
+  \item{discretization}{discretization information.}
   \item{rules}{the classifier rule base.}
+  \item{default}{default class label ot \code{NA}.}
   \item{weights}{rule weights.}
   \item{biases}{class biases.}
-  \item{class}{class variable.}
-  \item{default}{default class label.}
-  \item{discretization}{discretization information.}
-  \item{description}{description in human readable form.}
   \item{method}{classification method.}
-  \item{formula}{used formula.}
+  \item{description}{description in human readable form.}
 
-\code{predict} retuns predicted labels for \code{newdata}.
+\code{predict} returns predicted labels for \code{newdata}.
 
 \code{rules} returns the rule base.
 }
@@ -66,11 +65,10 @@ CBA_ruleset(formula, rules, method = "first", weights = NULL, default = NULL,
 }
 \examples{
 data("iris")
-iris.disc <- discretizeDF.supervised(Species ~., iris)
 
-# create transactions
+# discretize and create transactions
+iris.disc <- discretizeDF.supervised(Species ~., iris)
 trans <- as(iris.disc, "transactions")
-truth <- iris.disc$Species
 
 # create rule base with CARs
 cars <- mineCARs(Species ~ ., trans, parameter = list(support = .01, confidence = .8))
@@ -87,12 +85,12 @@ rules(cl)
 
 # make predictions
 prediction <- predict(cl, trans)
-table(prediction, truth)
+table(prediction, response(Species ~ ., trans))
 
 # use weighted majority
 cl <- CBA_ruleset(Species ~ ., cars, method = "majority", weights = "lift")
 cl
 
 prediction <- predict(cl, trans)
-table(prediction, truth)
+table(prediction, response(Species ~ ., trans))
 }
