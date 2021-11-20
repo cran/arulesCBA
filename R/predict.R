@@ -1,4 +1,5 @@
-
+#' @rdname CBA_ruleset
+#' @method predict CBA
 predict.CBA <- function(object, newdata, type = c("class", "score"), ...){
 
   type <- match.arg(type)
@@ -10,6 +11,15 @@ predict.CBA <- function(object, newdata, type = c("class", "score"), ...){
   m <- pmatch(method, methods)
   if(is.na(m)) stop("Unknown method")
   method <- methods[m]
+
+  # no rules. Always predict the default class
+  ### FIXME: Implement score.
+  ### FIXME: class should return a factor.
+  if(length(object$rules) == 0) {
+    if(type == "class") return(rep(object$default, nrow(newdata)))
+    # score
+    stop("prediction type 'score' is not yet implemented for classifier with no rules.")
+  }
 
   ### convert data
   if(is.null(object$discretization) && !is(newdata, "transactions"))
@@ -33,7 +43,7 @@ predict.CBA <- function(object, newdata, type = c("class", "score"), ...){
 
     w <- apply(rulesMatchLHS, MARGIN = 2, FUN = function(x) which(x)[1])
     output <- RHSclass[w]
-    if(any(is.na(w)) && is.na(object$default)) stop("Classifier has not default class, but produces NA!")
+    if(any(is.na(w)) && is.na(object$default)) warning("Classifier has no default class when no rules matches! Producing NAs!")
     output[is.na(w)] <- object$default
 
     # preserve the levels of original data for data.frames
@@ -64,21 +74,21 @@ predict.CBA <- function(object, newdata, type = c("class", "score"), ...){
   if(is.null(object$best_k)) {
     ### score is the sum of the weights of all matching rules
 
-    # biases
-    biases <- object$biases
+    # class bias
+    bias <- object$bias
 
-    if(!is.null(biases) && nrow(biases) != length(levels(RHSclass)))
-      stop("number of biases does not match number of rules/classes.")
+    if(!is.null(bias) && nrow(bias) != length(levels(RHSclass)))
+      stop("number of class bias values does not match number of rules/classes.")
 
-    # sum score and add biases
+    # sum score and add bias
     scores <- t(crossprod(weights, rulesMatchLHS))
-    if(!is.null(biases)) scores <- sweep(scores, 2, biases, '+')
+    if(!is.null(bias)) scores <- sweep(scores, 2, bias, '+')
   }else{
     ### score is the average of the top-N matching rules (see CPAR paper by Yin and Han, 2003)
 
     scores <- t(apply(rulesMatchLHS, MARGIN = 2, FUN = function(m) {
       m_weights <- weights*m
-      m_weights <- apply(m_weights, MARGIN = 2, sort, decreasing = TRUE)[1:object$best_k, , drop = FALSE]
+      m_weights <- apply(m_weights, MARGIN = 2, sort, decreasing = TRUE)[1:min(object$best_k, nrow(m_weights)), , drop = FALSE]
       m_weights[m_weights == 0] <- NA
       score <- colMeans(m_weights, na.rm = TRUE)
       score[is.na(score)] <- 0
