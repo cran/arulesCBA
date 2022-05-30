@@ -13,24 +13,34 @@ prepareTransactions(formula, data, disc.method = "mdlp", match = NULL)
 
 \item{disc.method}{Discretization method used to discretize continuous
 variables if data is a data.frame (default: \code{"mdlp"}). See
-\code{\link{discretizeDF.supervised}} for more supervised discretization
+\code{\link[=discretizeDF.supervised]{discretizeDF.supervised()}} for more supervised discretization
 methods.}
 
 \item{match}{typically \code{NULL}. Only used internally if data is a
 already a set of transactions.}
 }
 \value{
-An object of class \code{\link[arules]{transactions}} from
+An object of class \link[arules:transactions-class]{arules::transactions} from
 \pkg{arules} with an attribute called \code{"disc_info"} that contains
 information on the used discretization for each column.
 }
 \description{
-Data in a data.frame are discretized using class-based
-discretization and converted into transactions. For transaction data that was not created
-from a data.frame, a negative class item is added to create data for a binary classifier.
+Converts data.frame into transactions suitable for classification based on association rules.
+}
+\details{
+To convert a data.frame into items in a transaction dataset for classification,
+the following steps are performed:
+\enumerate{
+\item All continuous features are discretized using class-based
+discretization (default is MDLP) and each range is represented as an item.
+\item Factors are converted into items, one item for each level.
+\item Each logical is converted into an item.
+\item If the class variable is a logical, then a negative class item is added.
+}
+
+Steps 1-3 are skipped if \code{data} is already as \link[arules:transactions-class]{arules::transactions} object.
 }
 \examples{
-
 # Perform discretization and convert to transactions
 data("iris")
 iris_trans <- prepareTransactions(Species ~ ., iris)
@@ -41,10 +51,9 @@ inspect(head(iris_trans))
 data("Groceries")
 g2 <- prepareTransactions(`canned beer` ~ ., Groceries)
 inspect(head(g2))
-
 }
 \seealso{
-\code{\link[arules]{transactions}}, \code{\link{transactions2DF}}.
+\link[arules:transactions-class]{arules::transactions}, \code{transactions2DF()}.
 }
 \author{
 Michael Hahsler
