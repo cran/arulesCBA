@@ -14,8 +14,8 @@
 #'
 #' @param formula A symbolic description of the model to be fitted. Has to be
 #'   of form `class ~ .` or `class ~ predictor1 + predictor2`.
-#' @param data A data.frame or a [arules::transactions] containing the training data.
-#'   Data frames are automatically discretized and converted to transactions with [prepareTransactions()].
+#' @param data [arules::transactions] containing the training data or a data.frame which.
+#'   is automatically discretized and converted to transactions with [prepareTransactions()].
 #' @param pruning Pruning strategy used: "M1" or "M2".
 #' @param parameter,control Optional parameter and control lists for apriori.
 #' @param balanceSupport balanceSupport parameter passed to [mineCARs()] function.
@@ -153,10 +153,10 @@ pruneCBA_M1 <-
     )
 
     classes <- t(as(transactions[, class_ids], "ngCMatrix"))
-    uncoveredTrans <- as(transactions@data, "dgCMatrix")
+    uncoveredTrans <- as(transactions@data, "dsparseMatrix")
 
-    lhss <- as(lhs(rules)@data, "dgCMatrix")
-    rhss <- as(rhs(rules)@data, "dgCMatrix")
+    lhss <- as(lhs(rules)@data, "dsparseMatrix")
+    rhss <- as(rhs(rules)@data, "dsparseMatrix")
     rulesPerClassLeft <- rowSums(rhss[class_ids,])
 
     for (i in 1:length(rules)) {
@@ -271,7 +271,7 @@ pruneCBA_M1 <-
 #   parsedFormula <- .parseformula(formula, trans)
 #   class <- parsedFormula$class_names
 #   class_ids <- parsedFormula$class_ids
-#   vars <- parsedFormula$var_names
+#   vars <- parsedFormula$feature_names
 #
 #   quality(rules)$size <- size(rules)
 #
