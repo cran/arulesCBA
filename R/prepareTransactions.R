@@ -11,7 +11,9 @@
 #' 3. Each logical is converted into an item.
 #' 4. If the class variable is a logical, then a negative class item is added.
 #'
-#' Steps 1-3 are skipped if `data` is already as [arules::transactions] object.
+#' Steps 1-3 are skipped if `data` is already a [arules::transactions] object.
+#'
+#' @family preparation
 #'
 #' @param formula the formula.
 #' @param data a data.frame with the data.
@@ -19,6 +21,8 @@
 #'   variables if data is a data.frame (default: `"mdlp"`). See
 #'   [discretizeDF.supervised()] for more supervised discretization
 #'   methods.
+#' @param logical2factor logical; if `data` is a data.frame, should logical columns
+#'   be recoded as factor with TRUE/FALSE to generate positive and negative items?
 #' @param match typically `NULL`. Only used internally if data is a
 #'   already a set of transactions.
 #' @return An object of class [arules::transactions] from
@@ -30,24 +34,40 @@
 #' # Perform discretization and convert to transactions
 #' data("iris")
 #' iris_trans <- prepareTransactions(Species ~ ., iris)
-#' inspect(head(iris_trans))
 #'
-#' # A negative class item is added for regular transaction data (here "!canned beer")
-#' # Note: backticks are needed in formulas with item labels that contain a space or special
-#' # character.
+#' inspect(head(iris_trans))
+#' itemInfo(iris_trans)
+#'
+#' # A negative class item is added for regular transaction data. Here we get the
+#' # items "canned beer=TRUE" and "canned beer=FALSE".
+#' # Note: backticks are needed in formulas with item labels that contain
+#' # a space or special character.
 #' data("Groceries")
 #' g2 <- prepareTransactions(`canned beer` ~ ., Groceries)
+#'
 #' inspect(head(g2))
+#' ii <- itemInfo(g2)
+#' ii[ii[["variables"]] == "canned beer", ]
 #' @export
 prepareTransactions <-
   function(formula,
-    data,
-    disc.method = "mdlp",
-    match = NULL) {
+           data,
+           disc.method = "mdlp",
+           logical2factor = TRUE,
+           match = NULL) {
     if (is(data, "transactions")) {
-      ### add negative items to handle regular transaction data without variable info
-      if (is.null(itemInfo(data)$variables))
-        data <- addComplement(data, .parseformula(formula, data)$class_items)
+      ### just add negative items to handle regular transaction data without variable info
+      pf <- .parseformula(formula, data)
+
+      if (length(pf$class_ids) == 1L) {
+        data <-
+          addComplement(data,
+                        pf$class_items,
+                        complementLabels = paste0(pf$class_items, "=FALSE"))
+        itemLabels(data)[pf$class_ids] <-
+          paste0(pf$class_items, "=TRUE")
+      }
+
 
       ### Note: transactions might need recoding!
       if (!is.null(match))
@@ -56,10 +76,20 @@ prepareTransactions <-
       return(data)
     }
 
+    # deal with data.frame
+
     # handle logical variables by making them into factors (so FALSE is preserved)
-    for (i in 1:ncol(data))
-      if (is.logical(data[[i]]))
-        data[[i]] <- factor(data[[i]], levels = c(TRUE, FALSE))
+    if (logical2factor) {
+      for (i in 1:ncol(data))
+        if (is.logical(data[[i]]))
+          data[[i]] <- factor(data[[i]], levels = c(TRUE, FALSE))
+    } else {
+    # handle class variable
+      pf <- .parseformula(formula, data)
+      if (is.logical(data[[pf$class_ids]]))
+        data[[pf$class_ids]] <- factor(data[[pf$class_ids]], levels = c("TRUE", "FALSE"))
+    }
+
 
     # disc.method is a character string with the method
     if (!is.list(disc.method)) {

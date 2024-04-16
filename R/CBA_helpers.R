@@ -6,8 +6,8 @@
 #'
 #' @param formula A symbolic description of the model to be fitted.
 #' @param x,transactions An object of class [arules::transactions]
-#' or [rules].
-#' @param rules A set of [rules].
+#' or [arules::rules].
+#' @param rules A set of [arules::rules].
 #' @param type `"relative" or `"absolute"` to return proportions or
 #' absolute counts.
 #' @return `response` returns the response label as a factor.
@@ -18,8 +18,11 @@
 #' `majorityClass` returns the most frequent class label in the
 #' transactions.
 #' @name CBA_helpers
+#'
+#' @family classifiers
+#'
 #' @author Michael Hahsler
-#' @seealso [itemFrequency()], [rules], [arules::transactions].
+#' @seealso [arules::itemFrequency()], [arules::rules], [arules::transactions].
 #' @examples
 #' data("iris")
 #'
@@ -71,11 +74,22 @@ classes <- function(formula, x)
 #' @rdname CBA_helpers
 #' @export
 response <- function(formula, x) {
-  if (is.data.frame(x))
-    return(x[[.parseformula(formula, x)$class_ids]])
-  # this will add variable info for regular transactions
+  # data.frame has a single column
+  if (is.data.frame(x)) {
+    r <- x[[.parseformula(formula, x)$class_ids]]
+    if (is.logical(r))
+      r <- factor(r, levels = c("TRUE", "FALSE"))
+    if (!is.factor(r))
+      stop("class variable needs to the logical or a factor!")
+
+    return(r)
+  }
+
+  # this will add variable info for regular transactions and a FALSE item
   if (is(x, "transactions"))
     x <- prepareTransactions(formula, x)
+
+  ### FIXME: check if this works!
   if (is(x, "rules"))
     x <- items(x)
   if (!is(x, "itemMatrix"))
@@ -83,11 +97,20 @@ response <- function(formula, x) {
 
   vars <- .parseformula(formula, x)
   x <- x[, vars$class_ids]
-  l <- itemInfo(x)$levels
+  l <- as.character(itemInfo(x)$levels)
 
-  factor(unlist(LIST(x, decode = FALSE)),
-    levels = 1:length(l),
-    labels = l)
+  # handle single item class_ids
+  if (length(vars$class_ids) == 1)
+    res <- drop(as(x, "matrix"))
+  else {
+    # missing item needs to return NA
+    res <- sapply(LIST(x, decode = FALSE), FUN = function(y)
+      if (length(y) == 1L) y else NA)
+    res <- factor(res, levels = 1:length(l),
+           labels = l)
+  }
+
+  res
 }
 
 #' @rdname CBA_helpers

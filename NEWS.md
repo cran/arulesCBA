@@ -1,3 +1,9 @@
+# arulesCBA 1.2.6 (2024-04-15)
+
+* RCAR: Classifiers with a single rule now work
+* prepareTransactions gained parameter logical2factor.
+* Updated man pages.
+
 # arulesCBA 1.2.5 (2022-08-19)
 
 * Improved formula interface code.

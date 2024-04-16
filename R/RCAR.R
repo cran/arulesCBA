@@ -2,18 +2,47 @@
 #'
 #' Build a classifier based on association rules mined for an input dataset and
 #' weighted with LASSO regularized logistic regression following RCAR (Azmi, et
-#' al., 2019). RCAR+ extends RCAR from a binary classifier to a multi-class
+#' al., 2019). RCAR+ extends RCAR from a binary classifier to a multi-label
 #' classifier and can use support-balanced CARs.
 #'
-#' RCAR+ extends RCAR from a binary classifier to a multi-class classifier
+#' RCAR+ extends RCAR from a binary classifier to a multi-label classifier
 #' using regularized multinomial logistic regression via \pkg{glmnet}.
 #'
-#' If lambda is not specified (`NULL`) then cross-validation with the
-#' largest value of lambda such that error is within 1 standard error of the
-#' minimum is used to determine the best value (see [cv.glmnet()] also for how to
-#' perform cross-validation in parallel).
+#' In arulesCBA, the class variable is always represented by a set of items.
+#' For a binary classification problem, we use an item and its compliment
+#' (typically called `<item label>=TRUE` and `<item label>=FALSE`). For
+#' a multi-label classification problem we use one item for each possible class
+#' label (format `<class item>=<label>`). See [prepareTransactions()] for details.
+#'
+#' RCAR+ first mines CARs to find itemsets (LHS of the CARs) that are related
+#' to the class items. Then, a transaction x lhs(CAR) coverage matrix \eqn{X} is created.
+#' The matrix contains
+#' a 1 if the LHS of the CAR applies to the transaction, and 0 otherwise.
+#' A regularized multinominal logistic model to predict the true class \eqn{y}
+#' for each transaction given \eqn{X} is fitted. Note that the RHS of the
+#' CARs are actually ignored in this process, so the algorithm effectively
+#' uses rules consisting of each LHS of a CAR paired with each class label.
+#' This is important to keep in mind when trying to interpret the rules used in
+#' the classifier.
+#'
+#' If lambda for regularization is not specified during training (`lambda = NULL`)
+#' then cross-validation is used
+#' to determine the largest value of lambda such that the error is within 1 standard error of the
+#' minimum (see [glmnet::cv.glmnet()] for how to perform cross-validation in parallel).
+#'
+#' For the final classifier, we only keep the rules that have a weight greater than
+#' 0 for at least one class label. The rules include as the weight the beta coefficients
+#' of the model.
+#'
+#' Prediction for a new transaction is performed in two steps:
+#'
+#' 1. Translate the transaction into a 0-1 coverage vector indicating what class association
+#' rule's LHS covers the transaction.
+#' 2. Calculate the predicted label given the multinomial logistic regression model.
 #'
 #' @aliases RCAR rcar
+#'
+#' @family classifiers
 #'
 #' @param formula A symbolic description of the model to be fitted. Has to be
 #'   of form `class ~ .` or `class ~ predictor1 + predictor2`.
@@ -26,26 +55,30 @@
 #' @param alpha The elastic net mixing parameter. `alpha = 1` is the lasso
 #'   penalty (default RCAR), and `alpha = 0` the ridge penalty.
 #' @param cv.glmnet.args,glmnet.args A list of arguments passed on to
-#'   [cv.glmnet()] and [glmnet()], respectively. See Example section.
-#' @param parameter,control Optional parameter and control lists for [apriori()].
+#'   [glmnet::cv.glmnet()] and [glmnet::glmnet()], respectively. See Example section.
+#' @param parameter,control Optional parameter and control lists for [arules::apriori()].
 #' @param balanceSupport balanceSupport parameter passed to [mineCARs()].
 #' @param disc.method Discretization method for factorizing numeric input
 #'   (default: `"mdlp"`). See [discretizeDF.supervised()] for more
 #'   supervised discretization methods.
 #' @param verbose Report progress?
 #' @param ... For convenience, additional parameters are used to create the
-#' \code{parameter} control list for [apriori()] (e.g., to specify the support and
+#' \code{parameter} control list for [arules::apriori()] (e.g., to specify the support and
 #'   confidence thresholds).
 #' @return Returns an object of class [CBA] representing the trained
 #'   classifier with the additional field `model` containing a list with the
 #'   following elements:
 #'
-#' \item{all_rules}{all rules used to build the classifier, including the rules
-#'   with a weight of zero.}
 #' \item{reg_model}{them multinomial logistic
-#'   regression model as an object of class [glmnet()].}
-#' \item{cv}{contains the results for the cross-validation used determine
-#'   lambda.}
+#'   regression model as an object of class [glmnet::glmnet].}
+#' \item{cv}{only available if `lambda = NULL` was specified. Contains the
+#'   results for the cross-validation used determine
+#'   lambda. We use by default `lambda.1se` to determine lambda.}
+#' \item{all_rules}{ the actual classifier only contains the rules with
+#'   non-zero weights. This field contains all rules used to build the classifier,
+#'   including the rules with a weight of zero. This is consistent with the
+#'   model in `reg_model`. }
+#'
 #' @author Tyler Giallanza and Michael Hahsler
 #'
 #' @references
@@ -57,7 +90,7 @@
 #' @examples
 #' data("iris")
 #'
-#' classifier <- RCAR(Species~., iris)
+#' classifier <- RCAR(Species ~ ., iris)
 #' classifier
 #'
 #' # inspect the rule base sorted by the larges class weight
@@ -65,15 +98,21 @@
 #'
 #' # make predictions for the first few instances of iris
 #' predict(classifier, head(iris))
+#' table(pred = predict(classifier, iris), true = iris$Species)
 #'
-#' # inspecting the regression model, plot the regularization path, and
-#' # plot the cross-validation results to determine lambda
-#' str(classifier$model$reg_model)
-#' plot(classifier$model$reg_model)
+#' # plot the cross-validation curve as a function of lambda and add a
+#' # red line at lambda.1se used to determine lambda.
 #' plot(classifier$model$cv)
+#' abline(v = log(classifier$model$cv$lambda.1se), col = "red")
 #'
-#' # show progress report and use 5 instead of the default 10 cross-validation folds.
-#' classifier <- RCAR(Species~., iris, cv.glmnet.args = list(nfolds = 5), verbose = TRUE)
+#' # plot the coefficient profile plot (regularization path) for each class
+#' # label. Note the line for the chosen lambda is only added to the last plot.
+#' # You can manually add it to the others.
+#' plot(classifier$model$reg_model, xvar = "lambda", label = TRUE)
+#' abline(v = log(classifier$model$cv$lambda.1se), col = "red")
+#'
+#' #' inspect rule 11 which has a large weight for class virginica
+#' inspect(classifier$model$all_rules[11])
 #' @export
 RCAR <- function(formula,
   data,
@@ -109,11 +148,23 @@ RCAR <- function(formula,
     ...
   )
 
+  # remove the rule with the empty LHS
+  #cars <- cars[size(cars)>1]
+
   # create coverage matrix
   if (verbose)
     cat("* Creating model matrix\n")
-  X <- is.superset(trans, lhs(cars))
+
+  # Note: RCA ignores the RHS and only uses the LHS for classification!
+  X <- is.superset(trans, lhs(cars), sparse = TRUE)
   y <- response(formula, trans)
+
+  # remove transactions with missing y
+  if (any(m <- is.na(y))) {
+    X <- X[!m, , drop = FALSE]
+    y <- y[!m]
+  }
+
 
   # find lambda using cross-validation or fit the model for a fixed lambda
   cv <- NULL
@@ -158,17 +209,22 @@ RCAR <- function(formula,
     bias <- model$a0
   }
 
-  # weights: The odds multiply by exp(beta) for every 1-unit increase of x
+  # add weights
+  quality(cars)$weight <- apply(weights, MARGIN = 1, max)
+  quality(cars) <- cbind(quality(cars), weight = weights)
+
+  if (verbose)
+    cat("* CARs left:", length(rulebase), "\n")
+
+  # remove rules with all 0 weights
   remove <- apply(
     weights,
     MARGIN = 1,
     FUN = function(x)
       all(x == 0)
   )
-  quality(cars)$weight <- apply(weights, MARGIN = 1, max)
-  quality(cars)$oddsratio <- exp(quality(cars)$weight)
   rulebase <- cars[!remove]
-  weights <- weights[!remove,]
+  weights <- weights[!remove, , drop = FALSE]
 
   if (verbose)
     cat("* CARs left:", length(rulebase), "\n")

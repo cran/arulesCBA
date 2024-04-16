@@ -4,7 +4,13 @@
 \alias{prepareTransactions}
 \title{Prepare Data for Associative Classification}
 \usage{
-prepareTransactions(formula, data, disc.method = "mdlp", match = NULL)
+prepareTransactions(
+  formula,
+  data,
+  disc.method = "mdlp",
+  logical2factor = TRUE,
+  match = NULL
+)
 }
 \arguments{
 \item{formula}{the formula.}
@@ -15,6 +21,9 @@ prepareTransactions(formula, data, disc.method = "mdlp", match = NULL)
 variables if data is a data.frame (default: \code{"mdlp"}). See
 \code{\link[=discretizeDF.supervised]{discretizeDF.supervised()}} for more supervised discretization
 methods.}
+
+\item{logical2factor}{logical; if \code{data} is a data.frame, should logical columns
+be recoded as factor with TRUE/FALSE to generate positive and negative items?}
 
 \item{match}{typically \code{NULL}. Only used internally if data is a
 already a set of transactions.}
@@ -38,24 +47,37 @@ discretization (default is MDLP) and each range is represented as an item.
 \item If the class variable is a logical, then a negative class item is added.
 }
 
-Steps 1-3 are skipped if \code{data} is already as \link[arules:transactions-class]{arules::transactions} object.
+Steps 1-3 are skipped if \code{data} is already a \link[arules:transactions-class]{arules::transactions} object.
 }
 \examples{
 # Perform discretization and convert to transactions
 data("iris")
 iris_trans <- prepareTransactions(Species ~ ., iris)
-inspect(head(iris_trans))
 
-# A negative class item is added for regular transaction data (here "!canned beer")
-# Note: backticks are needed in formulas with item labels that contain a space or special
-# character.
+inspect(head(iris_trans))
+itemInfo(iris_trans)
+
+# A negative class item is added for regular transaction data. Here we get the
+# items "canned beer=TRUE" and "canned beer=FALSE".
+# Note: backticks are needed in formulas with item labels that contain
+# a space or special character.
 data("Groceries")
 g2 <- prepareTransactions(`canned beer` ~ ., Groceries)
+
 inspect(head(g2))
+ii <- itemInfo(g2)
+ii[ii[["variables"]] == "canned beer", ]
 }
 \seealso{
 \link[arules:transactions-class]{arules::transactions}, \code{transactions2DF()}.
+
+Other preparation: 
+\code{\link{CBA_ruleset}()},
+\code{\link{discretizeDF.supervised}()},
+\code{\link{mineCARs}()},
+\code{\link{transactions2DF}()}
 }
 \author{
 Michael Hahsler
 }
+\concept{preparation}
