@@ -1,3 +1,7 @@
+# arulesCBA 1.2.7 (2024-05-15)
+
+* fixed some missing package anchors in the man pages.
+
 # arulesCBA 1.2.6 (2024-04-15)
 
 * RCAR: Classifiers with a single rule now work
