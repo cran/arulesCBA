@@ -1,10 +1,10 @@
-3bbd0fa0e70eb0e08b8df3d248b08b9e *DESCRIPTION
+6504358c5e46ddc1e15d76a0fb5d19b9 *DESCRIPTION
 ba54099fba01f6d7678656fa8be0da3c *NAMESPACE
-bd9fcf1ddb6508e2769188c2c99f9d35 *NEWS.md
+d63e32432ea29d64cd53bb39e5fe6e1b *NEWS.md
 a2c0d690ee2857b5d2a9b30d735748ca *R/AAA_arulesCBA-package.R
 c3ddf1c5099769fc2c176c3c335e9989 *R/AAAdata.R
 3485fb85e3efb255e383c72e11e9f64f *R/AAAinstalled.R
-840f3bea7032e050fca51424f6e62816 *R/CBA.R
+2724bfef8f6b9da1280a4d8cf6cdb30f *R/CBA.R
 ef1266b5bd34583300a88da414efe489 *R/CBA_helpers.R
 f36e3f4a4605a9a05219c7b8706875d7 *R/CBA_ruleset.R
 a353b51f423e779e5f977ac9683288f8 *R/FOIL.R
@@ -17,8 +17,8 @@ c5a5b9570ae4248d35d12605d70ec88b *R/formula_helpers.R
 e9d072380c9c572ee1084b40d6c4e914 *R/predict.R
 1aa899f4c6d05a3ef8ebecb0597489bc *R/prepareTransactions.R
 dd3b6fcef8b567167497e5b8b7d690c4 *R/transactions2DF.R
-d70f0531d289a622237cac737cbd1f1d *README.md
-f61db891eb928123aba4412ca322f508 *build/partial.rdb
+e744121af609c287da2b979f3dcca574 *README.md
+1bf18d9c216b8d95033f0bd2fe2906b2 *build/partial.rdb
 c987fd355add6c4efdf1afb0852ae174 *data/Lymphography.rda
 97e7433f73335d67845565885e646f5c *data/Mushroom.rda
 6d9bd746860fcd900f10c436042d32c3 *inst/CITATION
@@ -35,8 +35,8 @@ f6b861e455377622caf72c5127614061 *man/FOIL.Rd
 cd7ca9958d48f59714adf551a4e9258d *man/Lymphography.Rd
 287d976332fdb600f1024f7f1979302a *man/Mushroom.Rd
 ccecab07d87e9325a8446ad3286da612 *man/RCAR.Rd
-dee62faf9d6b8565c1850a9aeb2554d6 *man/RWeka_CBA.Rd
-27948a8221d8d9e5be472d448fc645ac *man/arulesCBA-package.Rd
+559ec3b424a6a525fb1bf5eb8f7f72a2 *man/RWeka_CBA.Rd
+8b19d6ca87070e591a0e39769c7c32f4 *man/arulesCBA-package.Rd
 be0abb904bd28d8d6536f6e8a25d2e9b *man/discretizeDF.supervised.Rd
 599d9a8e2e1d5a8c4059336996d95da4 *man/figures/logo.svg
 8ab5fb387aac1d421389ca48050b559e *man/mineCARs.Rd
@@ -52,5 +52,5 @@ f3865c789eb7701e0d8a9c7fab46fb16 *tests/testthat.R
 441e3f98a8f851a034d251845f1b46c0 *tests/testthat/test-CBA_ruleset.R
 aad2a804824797184ed043355ea7c490 *tests/testthat/test-LUCS_KDD.R
 d7d328d18b679260afb712b17b652b41 *tests/testthat/test-RCAR.R
-1dd489cc6ee84ff1265b9f9c8f8ee7a7 *tests/testthat/test-classifiers.R
+fc973132649bfe9de4fed9eec26736be *tests/testthat/test-classifiers.R
 355851ce06da09f14191c55ce5435038 *tests/testthat/test-discretize.R

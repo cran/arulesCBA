@@ -1,3 +1,8 @@
+# arulesCBA 1.2.8 (2025-07-16)
+
+* fixed link for bug reports (reported by Kurt Hornik).
+* fixed rowSums bug in pruneCBA_M1.
+
 # arulesCBA 1.2.7 (2024-05-15)
 
 * fixed some missing package anchors in the man pages.
