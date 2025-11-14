@@ -135,15 +135,15 @@ mineCARs <-
 
     if (is.null(parameter) || !is(parameter, "APparameter")) {
       parameter <-  c(parameter, list(...))
-      if (is.null(parameter$sup))
-        parameter$support <- .1
-      if (is.null(parameter$con))
-        parameter$confidence <- .5
-      if (is.null(parameter$maxlen))
-        parameter$maxlen <- 5L
-      if (is.null(parameter$originalSupport))
-        parameter$originalSupport <- FALSE
+      # set different defaults for CBA, user may use supp ot conf for short
+      parameter$support <- parameter$support %||% parameter$supp %||% .1
+      parameter$supp <- NULL
+      parameter$confidence <- parameter$confidence %||% parameter$conf %||% .5
+      parameter$conf <- NULL
+      parameter$maxlen <- parameter$maxlen %||% 5L
+      parameter$originalSupport <- parameter$originalSupport %||% FALSE
       parameter <- as(parameter, "APparameter")
+      stopifnot(parameter@target == "rules")
     }
 
     # Generate CARs with APRIORI
