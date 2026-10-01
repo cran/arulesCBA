@@ -27,7 +27,7 @@ CMAR(
 \item{formula}{a symbolic description of the model to be fitted. Has to be
 of form \code{class ~ .} or \code{class ~ predictor1 + predictor2}.}
 
-\item{data}{A data.frame or \link[arules:transactions-class]{arules::transactions} containing the training data.
+\item{data}{A data.frame or \link[arules:transactions]{arules::transactions} containing the training data.
 Data frames are automatically discretized and converted to transactions with
 \code{\link[=prepareTransactions]{prepareTransactions()}}.}
 
@@ -51,12 +51,12 @@ trained classifier.
 \description{
 Interface for the LUCS-KDD Software Library Java implementations of CMAR
 (Li, Han and Pei, 2001), PRM, and CPAR (Yin and Han, 2003). \strong{Note:} The
-Java implementations is not part of \pkg{arulesCBA} and
-is only free for \strong{non-commercial use}.
+Java implementations are not part of \pkg{arulesCBA} and
+are free only for \strong{non-commercial use}.
 }
 \details{
 \strong{Requirement:} The code needs a
-\strong{JDK (Java Software Development Kit) Version 1.8 (or higher)}
+\strong{JDK (Java Development Kit) version 1.8 (or higher)}
 installation.
 On some systems (Windows),
 you may need to set the \code{JAVA_HOME} environment variable so the system
@@ -105,12 +105,12 @@ Association Rules, SDM, 2003.
 Frans Coenen et al. The LUCS-KDD Software Library, University of Liverpool, 2013.
 }
 \seealso{
-Other classifiers: 
-\code{\link{CBA}()},
-\code{\link{CBA_helpers}},
-\code{\link{CBA_ruleset}()},
-\code{\link{FOIL}()},
-\code{\link{RCAR}()},
-\code{\link{RWeka_CBA}}
+Other classifiers:
+\code{\link[=CBA]{CBA()}},
+\code{\link[=CBA_ruleset]{CBA_ruleset()}},
+\code{\link[=FOIL]{FOIL()}},
+\code{\link[=RCAR]{RCAR()}},
+\code{\link{RWeka_CBA}},
+\code{\link[=predict.CBA]{predict.CBA()}}
 }
 \concept{classifiers}

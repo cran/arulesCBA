@@ -15,8 +15,9 @@ discretization and the predictors to be discretized in the form
 
 \item{data}{a data.frame containing continuous variables to be discretized}
 
-\item{method}{discretization method. Available are: ``"mdlp"\verb{, }"caim"`, `"cacc"`, `"ameva"`, `"chi2"`,
-`"chimerge"`, `"extendedchi2"`, and `"modchi2"`.}
+\item{method}{Discretization method. Available methods are \code{"mdlp"},
+\code{"caim"}, \code{"cacc"}, \code{"ameva"}, \code{"chi2"},
+\code{"chimerge"}, \code{"extendedchi2"}, and \code{"modchi2"}.}
 
 \item{dig.lab}{integer; number of digits used to create labels.}
 
@@ -25,18 +26,18 @@ the chosen discretization method.}
 }
 \value{
 \code{discretizeDF()} returns a discretized data.frame. Discretized
-columns have an attribute \code{"discretized:breaks"} indicating the used
-breaks or and \code{"discretized:method"} giving the used method.
+columns have an attribute \code{"discretized:breaks"} indicating the
+breaks used and \code{"discretized:method"} giving the method used.
 }
 \description{
 This function implements several supervised methods to convert continuous
-variables into a categorical variables (factor) suitable for association
+variables into categorical variables (factors) suitable for association
 rule mining and building associative classifiers. A whole data.frame is
 discretized (i.e., all numeric columns are discretized).
 }
 \details{
 \code{discretizeDF.supervised()} only implements supervised discretization.
-See \code{\link[arules:discretize]{arules::discretizeDF()}} in package \pkg{arules} for unsupervised
+See \code{\link[arules:discretizeDF]{arules::discretizeDF()}} in package \pkg{arules} for unsupervised
 discretization.
 }
 \examples{
@@ -58,7 +59,7 @@ head(iris.disc2)
 }
 \seealso{
 Unsupervised discretization from \pkg{arules}:
-\code{\link[arules:discretize]{arules::discretize()}}, \code{\link[arules:discretize]{arules::discretizeDF()}}.
+\code{\link[arules:discretize]{arules::discretize()}}, \code{\link[arules:discretizeDF]{arules::discretizeDF()}}.
 
 Details about the available supervised discretization methods from
 \pkg{discretization}:
@@ -71,11 +72,10 @@ Details about the available supervised discretization methods from
 \link[discretization:extendChi2]{discretization::extendChi2},
 \link[discretization:modChi2]{discretization::modChi2}.
 
-Other preparation: 
-\code{\link{CBA_ruleset}()},
-\code{\link{mineCARs}()},
-\code{\link{prepareTransactions}()},
-\code{\link{transactions2DF}()}
+Other preparation:
+\code{\link[=mineCARs]{mineCARs()}},
+\code{\link[=prepareTransactions]{prepareTransactions()}},
+\code{\link[=transactions2DF]{transactions2DF()}}
 }
 \author{
 Michael Hahsler

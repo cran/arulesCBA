@@ -18,7 +18,7 @@ FOIL(
 \item{formula}{A symbolic description of the model to be fitted. Has to be
 of form \code{class ~ .} or \code{class ~ predictor1 + predictor2}.}
 
-\item{data}{A data.frame or \link[arules:transactions-class]{arules::transactions} containing the training data.
+\item{data}{A data.frame or \link[arules:transactions]{arules::transactions} containing the training data.
 Data frames are automatically discretized and converted to transactions with
 \code{\link[=prepareTransactions]{prepareTransactions()}}.}
 
@@ -26,7 +26,7 @@ Data frames are automatically discretized and converted to transactions with
 
 \item{min_gain}{minimal gain required to expand a rule.}
 
-\item{best_k}{use the average expected accuracy (laplace) of the best k
+\item{best_k}{Use the average expected accuracy (Laplace) of the best k
 rules per class for prediction.}
 
 \item{disc.method}{Discretization method used to discretize continuous
@@ -83,13 +83,13 @@ Association Rules, SDM, 2003.
 \doi{10.1137/1.9781611972733.40}
 }
 \seealso{
-Other classifiers: 
-\code{\link{CBA}()},
-\code{\link{CBA_helpers}},
-\code{\link{CBA_ruleset}()},
+Other classifiers:
+\code{\link[=CBA]{CBA()}},
+\code{\link[=CBA_ruleset]{CBA_ruleset()}},
 \code{\link{LUCS_KDD_CBA}},
-\code{\link{RCAR}()},
-\code{\link{RWeka_CBA}}
+\code{\link[=RCAR]{RCAR()}},
+\code{\link{RWeka_CBA}},
+\code{\link[=predict.CBA]{predict.CBA()}}
 }
 \author{
 Michael Hahsler

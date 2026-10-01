@@ -2,12 +2,12 @@
 % Please edit documentation in R/transactions2DF.R
 \name{transactions2DF}
 \alias{transactions2DF}
-\title{Convert Transactions to a Data.Frame}
+\title{Convert Transactions to a Data Frame}
 \usage{
 transactions2DF(transactions, itemLabels = FALSE)
 }
 \arguments{
-\item{transactions}{an object of class \link[arules:transactions-class]{arules::transactions}.}
+\item{transactions}{An object of class \link[arules:transactions]{arules::transactions}.}
 
 \item{itemLabels}{logical; use the complete item labels (variable=level) as the
 levels in the data.frame? By default, only the levels are used.}
@@ -16,7 +16,7 @@ levels in the data.frame? By default, only the levels are used.}
 Returns a data.frame.
 }
 \description{
-Convert transactions back into data.frames by combining the
+Convert transactions back into data frames by combining the
 items for the same variable into a single column.
 }
 \examples{
@@ -41,11 +41,10 @@ g2 <- prepareTransactions(`shopping bags` ~ ., Groceries)
 head(transactions2DF(g2), 2)
 }
 \seealso{
-Other preparation: 
-\code{\link{CBA_ruleset}()},
-\code{\link{discretizeDF.supervised}()},
-\code{\link{mineCARs}()},
-\code{\link{prepareTransactions}()}
+Other preparation:
+\code{\link[=discretizeDF.supervised]{discretizeDF.supervised()}},
+\code{\link[=mineCARs]{mineCARs()}},
+\code{\link[=prepareTransactions]{prepareTransactions()}}
 }
 \author{
 Michael Hahsler

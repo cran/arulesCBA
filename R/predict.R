@@ -5,7 +5,7 @@
 #' @aliases predict
 #' @name predict.CBA
 #'
-#' @family classifier
+#' @family classifiers
 #'
 #' @param object An object of class [CBA].
 #' @param newdata A data.frame or [arules::transactions] containing rows of new entries
@@ -100,6 +100,8 @@ predict.CBA <-
     # For each transaction, if it is matched by any rule, classify it using
     # the majority, weighted majority
 
+    # TODO: No R code currently calls the registered R_weighted routine in
+    # src/weighted.c. Weighted predictions here use the R implementation.
     # weights
     weights <- object$weights
     if (is.character(weights))

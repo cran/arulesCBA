@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Michael Hahsler" />
+
+
+<title>Getting started with arulesCBA</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting started with arulesCBA</h1>
+<h4 class="author">Michael Hahsler</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#installation" id="toc-installation">Installation</a></li>
+<li><a href="#train-a-classifier" id="toc-train-a-classifier">Train a
+classifier</a></li>
+<li><a href="#inspect-the-learned-rules" id="toc-inspect-the-learned-rules">Inspect the learned rules</a></li>
+<li><a href="#predict-and-evaluate" id="toc-predict-and-evaluate">Predict and evaluate</a></li>
+<li><a href="#control-rule-mining" id="toc-control-rule-mining">Control
+rule mining</a></li>
+<li><a href="#prepare-and-mine-rules-separately" id="toc-prepare-and-mine-rules-separately">Prepare and mine rules
+separately</a></li>
+<li><a href="#other-classifiers" id="toc-other-classifiers">Other
+classifiers</a></li>
+</ul>
+</div>
+
+<p><code>arulesCBA</code> builds classifiers from class association
+rules (CARs). A CAR has predictor conditions on its left-hand side and a
+class label on its right-hand side. This makes the resulting model
+inspectable: a prediction can be traced back to one or more rules.</p>
+<p>This guide shows the typical workflow:</p>
+<ol style="list-style-type: decimal">
+<li>split a data frame into training and test data;</li>
+<li>learn a CBA classifier;</li>
+<li>inspect its rule base; and</li>
+<li>predict classes and evaluate accuracy.</li>
+</ol>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>Install the released version from CRAN:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;arulesCBA&quot;</span>)</span></code></pre></div>
+<p>Then load the package:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(arulesCBA)</span></code></pre></div>
+<p>Loading <code>arulesCBA</code> also makes the transaction and rule
+infrastructure from <code>arules</code> available.</p>
+</div>
+<div id="train-a-classifier" class="section level2">
+<h2>Train a classifier</h2>
+<p>We use the numeric measurements in <code>iris</code> to predict
+<code>Species</code>. Keep a test set aside so that evaluation uses
+observations that were not used to build the classifier.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>train_id <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(iris)), <span class="dv">100</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>iris_train <span class="ot">&lt;-</span> iris[train_id, ]</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>iris_test <span class="ot">&lt;-</span> iris[<span class="sc">-</span>train_id, ]</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">table</span>(iris_train<span class="sc">$</span>Species)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;     setosa versicolor  virginica </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;         32         32         36</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">table</span>(iris_test<span class="sc">$</span>Species)</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;     setosa versicolor  virginica </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;         18         18         14</span></span></code></pre></div>
+<p><code>CBA()</code> accepts the same formula-and-data interface as
+many R modeling functions. Numeric predictors are discretized
+automatically because association rules operate on items rather than
+continuous values.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>classifier <span class="ot">&lt;-</span> <span class="fu">CBA</span>(Species <span class="sc">~</span> ., <span class="at">data =</span> iris_train)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>classifier</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; CBA Classifier Object</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; Formula: Species ~ .</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; Number of rules: 4</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; Default Class: virginica</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; Classification method: first  </span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; Description: CBA algorithm (Liu et al., 1998)</span></span></code></pre></div>
+<p>The printed model reports the number of retained rules, the default
+class, and the classification strategy. CBA ranks candidate rules,
+prunes the rule base, and uses the first matching rule for prediction.
+If no rule matches, it uses the default class.</p>
+</div>
+<div id="inspect-the-learned-rules" class="section level2">
+<h2>Inspect the learned rules</h2>
+<p>The rules are stored in <code>classifier$rules</code> as an
+<code>arules</code> <code>rules</code> object. The first few rules can
+be displayed with <code>inspect()</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(classifier<span class="sc">$</span>rules, <span class="dv">5</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt;     lhs                            rhs                  support confidence coverage     lift count size coveredTransactions totalErrors</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] {Petal.Length=[-Inf,2.6)}   =&gt; {Species=setosa}        0.32       1.00     0.32 3.125000    32    2                  32          32</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [2] {Petal.Length=[4.85, Inf],                                                                                                         </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;      Petal.Width=[1.65, Inf]}   =&gt; {Species=virginica}     0.31       1.00     0.31 2.777778    31    3                  31           5</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; [3] {Petal.Length=[2.6,4.85),                                                                                                          </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;      Petal.Width=[0.7,1.65)}    =&gt; {Species=versicolor}    0.30       1.00     0.30 3.125000    30    3                  30           2</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; [4] {}                          =&gt; {Species=virginica}     0.36       0.36     1.00 1.000000   100    1                   7           2</span></span></code></pre></div>
+<p>A rule such as
+<code>{Petal.Length=[-Inf,1.9)} =&gt; {Species=setosa}</code> says that
+observations whose petal length falls in that interval are predicted as
+<code>setosa</code>. The exact intervals depend on the training
+sample.</p>
+<p>The most important rule quality measures are:</p>
+<ul>
+<li><strong>support:</strong> the proportion of training observations
+covered by the rule’s conditions;</li>
+<li><strong>confidence:</strong> the proportion of covered observations
+that have the class shown on the right-hand side; and</li>
+<li><strong>lift:</strong> the confidence relative to the prevalence of
+that class.</li>
+</ul>
+<p>Quality measures are available as a data frame, so they can be
+summarized or used to select rules.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">quality</span>(classifier<span class="sc">$</span>rules)[, <span class="fu">c</span>(<span class="st">&quot;support&quot;</span>, <span class="st">&quot;confidence&quot;</span>, <span class="st">&quot;lift&quot;</span>)])</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt;     support         confidence        lift      </span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;  Min.   :0.3000   Min.   :0.36   Min.   :1.000  </span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;  1st Qu.:0.3075   1st Qu.:0.84   1st Qu.:2.333  </span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;  Median :0.3150   Median :1.00   Median :2.951  </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;  Mean   :0.3225   Mean   :0.84   Mean   :2.507  </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;  3rd Qu.:0.3300   3rd Qu.:1.00   3rd Qu.:3.125  </span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;  Max.   :0.3600   Max.   :1.00   Max.   :3.125</span></span></code></pre></div>
+</div>
+<div id="predict-and-evaluate" class="section level2">
+<h2>Predict and evaluate</h2>
+<p>Pass the original, undiscretized data frame to
+<code>predict()</code>. The classifier stores the cut points learned
+from the training data and applies the same cut points to new
+observations.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>prediction <span class="ot">&lt;-</span> <span class="fu">predict</span>(classifier, iris_test)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">head</span>(prediction)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; [1] setosa setosa setosa setosa setosa setosa</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; Levels: setosa versicolor virginica</span></span></code></pre></div>
+<p>A confusion matrix shows which classes were confused.
+<code>accuracy()</code> calculates the overall fraction classified
+correctly.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">table</span>(<span class="at">predicted =</span> prediction, <span class="at">observed =</span> iris_test<span class="sc">$</span>Species)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt;             observed</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; predicted    setosa versicolor virginica</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt;   setosa         18          0         0</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt;   versicolor      0         15         0</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;   virginica       0          3        14</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">accuracy</span>(prediction, iris_test<span class="sc">$</span>Species)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; [1] 0.94</span></span></code></pre></div>
+<p>For a reliable estimate of predictive performance, use repeated
+train/test splits or cross-validation rather than reporting accuracy on
+the training data.</p>
+</div>
+<div id="control-rule-mining" class="section level2">
+<h2>Control rule mining</h2>
+<p>The most commonly adjusted mining parameters are minimum support,
+minimum confidence, and maximum rule length. They can be supplied
+directly to <code>CBA()</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>classifier_tuned <span class="ot">&lt;-</span> <span class="fu">CBA</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  Species <span class="sc">~</span> .,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">data =</span> iris_train,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">support =</span> <span class="fl">0.05</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">confidence =</span> <span class="fl">0.9</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">maxlen =</span> <span class="dv">4</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>classifier_tuned</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; CBA Classifier Object</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Formula: Species ~ .</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Number of rules: 4</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; Default Class: virginica</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; Classification method: first  </span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; Description: CBA algorithm (Liu et al., 1998)</span></span></code></pre></div>
+<p>Lower support typically produces more candidate rules, while higher
+confidence requires rules to be more reliable on the training data.
+Increasing <code>maxlen</code> allows more conditions in a rule. These
+settings affect both runtime and model complexity; very low support or a
+large <code>maxlen</code> can produce an extremely large candidate rule
+set.</p>
+<p>The same settings can instead be passed in a named list:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>classifier <span class="ot">&lt;-</span> <span class="fu">CBA</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  Species <span class="sc">~</span> .,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="at">data =</span> iris_train,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>  <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">support =</span> <span class="fl">0.05</span>, <span class="at">confidence =</span> <span class="fl">0.9</span>, <span class="at">maxlen =</span> <span class="dv">4</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>)</span></code></pre></div>
+<p>For imbalanced data, <code>balanceSupport = TRUE</code> lowers the
+minimum support for minority classes relative to the majority class:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>classifier_balanced <span class="ot">&lt;-</span> <span class="fu">CBA</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  class <span class="sc">~</span> .,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">data =</span> training_data,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">support =</span> <span class="fl">0.1</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">confidence =</span> <span class="fl">0.8</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">balanceSupport =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="prepare-and-mine-rules-separately" class="section level2">
+<h2>Prepare and mine rules separately</h2>
+<p><code>CBA()</code> handles data preparation, rule mining, and pruning
+in one call. The individual steps are also available when more control
+is needed.</p>
+<p><code>prepareTransactions()</code> discretizes numeric predictors and
+converts every row to a transaction. Class values become items that can
+appear on the right-hand side of a CAR.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>iris_transactions <span class="ot">&lt;-</span> <span class="fu">prepareTransactions</span>(Species <span class="sc">~</span> ., iris_train)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>iris_transactions</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; transactions in sparse format with</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;  100 transactions (rows) and</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;  14 items (columns)</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(iris_transactions, <span class="dv">3</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;     items                       transactionID</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; [1] {Sepal.Length=[-Inf,5.45),               </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;      Sepal.Width=[2.95, Inf],                </span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;      Petal.Length=[-Inf,2.6),                </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;      Petal.Width=[-Inf,0.7),                 </span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt;      Species=setosa}                      28 </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; [2] {Sepal.Length=[5.45,6.25),               </span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt;      Sepal.Width=[-Inf,2.95),                </span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;      Petal.Length=[2.6,4.85),                </span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt;      Petal.Width=[0.7,1.65),                 </span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;      Species=versicolor}                  80 </span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; [3] {Sepal.Length=[6.25, Inf],               </span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt;      Sepal.Width=[2.95, Inf],                </span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt;      Petal.Length=[4.85, Inf],               </span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;      Petal.Width=[1.65, Inf],                </span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt;      Species=virginica}                   101</span></span></code></pre></div>
+<p><code>mineCARs()</code> restricts the right-hand side of every mined
+rule to a value of the response variable.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>cars <span class="ot">&lt;-</span> <span class="fu">mineCARs</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  Species <span class="sc">~</span> .,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  iris_transactions,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">support =</span> <span class="fl">0.1</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">confidence =</span> <span class="fl">0.8</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">maxlen =</span> <span class="dv">4</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">FALSE</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>cars</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; set of 41 rules</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(cars, <span class="dv">5</span>))</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt;     lhs                           rhs                  support confidence</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; [1] {Petal.Length=[-Inf,2.6)}  =&gt; {Species=setosa}     0.32    1.0000000 </span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; [2] {Petal.Width=[-Inf,0.7)}   =&gt; {Species=setosa}     0.32    1.0000000 </span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt; [3] {Sepal.Length=[-Inf,5.45)} =&gt; {Species=setosa}     0.31    0.8857143 </span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; [4] {Petal.Length=[2.6,4.85)}  =&gt; {Species=versicolor} 0.31    0.9393939 </span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; [5] {Petal.Width=[0.7,1.65)}   =&gt; {Species=versicolor} 0.31    0.9117647 </span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt;     coverage lift     count</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; [1] 0.32     3.125000 32   </span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; [2] 0.32     3.125000 32   </span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co">#&gt; [3] 0.35     2.767857 31   </span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt; [4] 0.33     2.935606 31   </span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="co">#&gt; [5] 0.34     2.849265 31</span></span></code></pre></div>
+<p>These lower-level functions are useful for studying the candidate
+rules or for constructing a custom classifier with
+<code>CBA_ruleset()</code>. For a first analysis, the higher-level
+<code>CBA()</code> interface is usually sufficient.</p>
+</div>
+<div id="other-classifiers" class="section level2">
+<h2>Other classifiers</h2>
+<p>The package includes several other associative classification
+algorithms, including <code>FOIL()</code>, <code>RCAR()</code>,
+<code>CMAR()</code>, <code>CPAR()</code>, and <code>PRM()</code>. It
+also provides wrappers for rule learners from <code>RWeka</code>. Some
+of these methods require Java and additional suggested packages; see
+their help pages for requirements and algorithm-specific options.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">help</span>(<span class="at">package =</span> <span class="st">&quot;arulesCBA&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>?CBA</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>?mineCARs</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>?CBA_ruleset</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

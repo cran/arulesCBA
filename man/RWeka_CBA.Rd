@@ -17,12 +17,12 @@ C4.5_CBA(formula, data, control = NULL, disc.method = "mdlp")
 \item{formula}{A symbolic description of the model to be fitted. Has to be
 of form \code{class ~ .} or \code{class ~ predictor1 + predictor2}.}
 
-\item{data}{A data.frame or \link[arules:transactions-class]{arules::transactions} containing the training data.
+\item{data}{A data.frame or \link[arules:transactions]{arules::transactions} containing the training data.
 Data frames are automatically discretized and converted to transactions with
 \code{\link[=prepareTransactions]{prepareTransactions()}}.}
 
-\item{control}{algorithmic control options for R/Weka Rule learners (see
-Details Section).}
+\item{control}{Algorithmic control options for R/Weka rule learners (see
+the Details section).}
 
 \item{disc.method}{Discretization method used to discretize continuous
 variables if data is a data.frame (default: \code{"mdlp"}). See
@@ -40,14 +40,14 @@ RWeka (Hornik et al, 2009). These classifiers do not mine CARs, but
 directly create rules.
 }
 \details{
-You need to install package \pkg{RWeka} to use these classifiers.
+You need to install the \pkg{RWeka} package to use these classifiers.
 
 See R/Weka functions
-\code{\link[RWeka:Weka_classifier_rules]{RWeka::JRip()}} (RIPPER),
-\code{\link[RWeka:Weka_classifier_trees]{RWeka::J48()}} (C4.5 rules),
-\code{\link[RWeka:Weka_classifier_rules]{RWeka::PART()}}
+\code{\link[RWeka:JRip]{RWeka::JRip()}} (RIPPER),
+\code{\link[RWeka:J48]{RWeka::J48()}} (C4.5 rules),
+\code{\link[RWeka:PART]{RWeka::PART()}}
 for algorithm details and how control options can be passed on via
-\code{control}. An example is given in the Examples Section below.
+\code{control}. An example is given in the Examples section below.
 
 Memory for \pkg{RWeka} can be increased using the R options (e.g.,
 \code{options(java.parameters = "-Xmx1024m")}) before \pkg{RWeka} or
@@ -108,13 +108,13 @@ Weka." \emph{Computational Statistics,} 24(2), 225-232.
 \doi{10.1007/s00180-008-0119-7}
 }
 \seealso{
-Other classifiers: 
-\code{\link{CBA}()},
-\code{\link{CBA_helpers}},
-\code{\link{CBA_ruleset}()},
-\code{\link{FOIL}()},
+Other classifiers:
+\code{\link[=CBA]{CBA()}},
+\code{\link[=CBA_ruleset]{CBA_ruleset()}},
+\code{\link[=FOIL]{FOIL()}},
 \code{\link{LUCS_KDD_CBA}},
-\code{\link{RCAR}()}
+\code{\link[=RCAR]{RCAR()}},
+\code{\link[=predict.CBA]{predict.CBA()}}
 }
 \author{
 Michael Hahsler
